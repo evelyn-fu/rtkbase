@@ -32,12 +32,27 @@ const (
 )
 
 func Configure() {
+	disableAll()
+	saveAllConfigs()
+}
+
+func disableAll() {
+	disableRTCMCommand(UBX_RTCM_1005, COM_PORT_UART2)
+	disableRTCMCommand(UBX_RTCM_1074, COM_PORT_UART2)
+	disableRTCMCommand(UBX_RTCM_1084, COM_PORT_UART2)
+	disableRTCMCommand(UBX_RTCM_1094, COM_PORT_UART2)
+	disableRTCMCommand(UBX_RTCM_1124, COM_PORT_UART2)
+	disableRTCMCommand(UBX_RTCM_1230, COM_PORT_UART2)
+}
+
+func enableAll() {
 	enableRTCMCommand(UBX_RTCM_1005, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_RTCM_1074, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_RTCM_1084, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_RTCM_1094, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_RTCM_1124, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_RTCM_1230, COM_PORT_UART2, 5)
+
 	saveAllConfigs()
 }
 
@@ -78,6 +93,10 @@ func setStaticPosition(ecefXOrLat int, ecefXOrLatHP int, ecefYOrLon int, ecefYOr
 	sendCommand(cls, id, msg_len, payloadCfg)
 }
 
+func disableRTCMCommand(messageNumber int, portId int) {
+	enableRTCMCommand(messageNumber, portId, 0)
+}
+
 func enableRTCMCommand(messageNumber int, portId int, sendRate int) {
 	//dont use current port settings actually
 	payloadCfg := make([]byte, 256)
@@ -89,7 +108,7 @@ func enableRTCMCommand(messageNumber int, portId int, sendRate int) {
 	payloadCfg[0] = byte(UBX_RTCM_MSB)
 	payloadCfg[1] = byte(messageNumber)
 	payloadCfg[2 + portId] = byte(sendRate)
-	//default to have the usb on with same sendRate
+	//default to enable usb on with same sendRate
 	payloadCfg[2 + COM_PORT_USB] = byte(sendRate)
 
 	sendCommand(cls, id, msg_len, payloadCfg)
@@ -101,7 +120,7 @@ func sendCommand(cls int, id int, msg_len int, payloadCfg []byte) ([]byte){
 	log.Print(byte(checksumA))
 
 	options := serial.OpenOptions {
-		PortName: "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.4:1.0", // change to base port
+		PortName: "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0", // change to base port
 		BaudRate: 115200,
 		DataBits: 8,
 		StopBits: 1,
