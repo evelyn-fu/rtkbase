@@ -47,7 +47,7 @@ func main() {
 	// w := bufio.NewWriter(writePort)
 	// r := io.TeeReader(readPort, w)
 
-	base.Configure()
+	base.disableAll()
 	scanner := rtcm3.NewScanner(readPort)
 
 	for err == nil {

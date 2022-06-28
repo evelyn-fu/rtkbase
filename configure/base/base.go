@@ -27,14 +27,32 @@ const (
 	MAX_PAYLOAD_SIZE = 256
 	UBX_CFG_PRT = 0x00
 	UBX_CFG_CFG = 0x09
-	VAL_CFG_SUBSEC_IOPORT = 0x00000001;   // ioPort - communications port settings (causes IO system reset!)
-	VAL_CFG_SUBSEC_MSGCONF = 0x00000002;  // msgConf - message configuration
-)
+	VAL_CFG_SUBSEC_IOPORT = 0x00000001  // ioPort - communications port settings (causes IO system reset!)
+	VAL_CFG_SUBSEC_MSGCONF = 0x00000002  // msgConf - message configuration
 
-func Configure() {
-	disableAll()
-	saveAllConfigs()
-}
+	UBX_NMEA_MSB = 0xF0 // All NMEA enable commands have 0xF0 as MSB. Equal to UBX_CLASS_NMEA
+	UBX_NMEA_DTM = 0x0A // GxDTM (datum reference)
+	UBX_NMEA_GAQ = 0x45 // GxGAQ (poll a standard message (if the current talker ID is GA))
+  	UBX_NMEA_GBQ = 0x44 // GxGBQ (poll a standard message (if the current Talker ID is GB))
+  	UBX_NMEA_GBS = 0x09 // GxGBS (GNSS satellite fault detection)
+  	UBX_NMEA_GGA = 0x00 // GxGGA (Global positioning system fix data)
+  	UBX_NMEA_GLL = 0x01 // GxGLL (latitude and long, whith time of position fix and status)
+  	UBX_NMEA_GLQ = 0x43 // GxGLQ (poll a standard message (if the current Talker ID is GL))
+  	UBX_NMEA_GNQ = 0x42 // GxGNQ (poll a standard message (if the current Talker ID is GN))
+  	UBX_NMEA_GNS = 0x0D // GxGNS (GNSS fix data)
+  	UBX_NMEA_GPQ = 0x40 // GxGPQ (poll a standard message (if the current Talker ID is GP))
+  	UBX_NMEA_GQQ = 0x47 // GxGQQ (poll a standard message (if the current Talker ID is GQ))
+  	UBX_NMEA_GRS = 0x06 // GxGRS (GNSS range residuals)
+  	UBX_NMEA_GSA = 0x02 // GxGSA (GNSS DOP and Active satellites)
+  	UBX_NMEA_GST = 0x07 // GxGST (GNSS Pseudo Range Error Statistics)
+  	UBX_NMEA_GSV = 0x03 // GxGSV (GNSS satellites in view)
+  	UBX_NMEA_RLM = 0x0B // GxRMC (Return link message (RLM))
+  	UBX_NMEA_RMC = 0x04 // GxRMC (Recommended minimum data)
+  	UBX_NMEA_TXT = 0x41 // GxTXT (text transmission)
+  	UBX_NMEA_VLW = 0x0F // GxVLW (dual ground/water distance)
+  	UBX_NMEA_VTG = 0x05 // GxVTG (course over ground and Ground speed)
+  	UBX_NMEA_ZDA = 0x08 // GxZDA (Time and Date)
+)
 
 func disableAll() {
 	disableRTCMCommand(UBX_RTCM_1005, COM_PORT_UART2)
@@ -43,16 +61,26 @@ func disableAll() {
 	disableRTCMCommand(UBX_RTCM_1094, COM_PORT_UART2)
 	disableRTCMCommand(UBX_RTCM_1124, COM_PORT_UART2)
 	disableRTCMCommand(UBX_RTCM_1230, COM_PORT_UART2)
+	saveAllConfigs()
 }
 
-func enableAll() {
+func EnableAll() {
 	enableRTCMCommand(UBX_RTCM_1005, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_RTCM_1074, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_RTCM_1084, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_RTCM_1094, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_RTCM_1124, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_RTCM_1230, COM_PORT_UART2, 5)
+	saveAllConfigs()
+}
 
+func enableNMEA() {
+	enableRTCMCommand(UBX_NMEA_GLL, COM_PORT_UART2, 1)
+	enableRTCMCommand(UBX_NMEA_GSA, COM_PORT_UART2, 1)
+	enableRTCMCommand(UBX_NMEA_GSV, COM_PORT_UART2, 1)
+	enableRTCMCommand(UBX_NMEA_RMC, COM_PORT_UART2, 1)
+	enableRTCMCommand(UBX_NMEA_VTG, COM_PORT_UART2, 1)
+	enableRTCMCommand(UBX_NMEA_GGA, COM_PORT_UART2, 1)
 	saveAllConfigs()
 }
 
