@@ -8,6 +8,8 @@ import (
 const (
 	UBX_SYNCH_1 = 0xB5
 	UBX_SYNCH_2 = 0x62
+	UBX_RTCM_1001 = 0x01;
+	UBX_RTCM_1002 = 0x02;
 	UBX_RTCM_1005 = 0x05;   // Stationary RTK reference ARP
 	UBX_RTCM_1074 = 0x4A;   // GPS MSM4
 	UBX_RTCM_1077 = 0x4D;   // GPS MSM7
@@ -54,13 +56,15 @@ const (
   	UBX_NMEA_ZDA = 0x08 // GxZDA (Time and Date)
 )
 
-func disableAll() {
+func DisableAll() {
 	disableRTCMCommand(UBX_RTCM_1005, COM_PORT_UART2)
 	disableRTCMCommand(UBX_RTCM_1074, COM_PORT_UART2)
 	disableRTCMCommand(UBX_RTCM_1084, COM_PORT_UART2)
 	disableRTCMCommand(UBX_RTCM_1094, COM_PORT_UART2)
 	disableRTCMCommand(UBX_RTCM_1124, COM_PORT_UART2)
 	disableRTCMCommand(UBX_RTCM_1230, COM_PORT_UART2)
+	disableRTCMCommand(UBX_RTCM_1001, COM_PORT_UART2)
+	disableRTCMCommand(UBX_RTCM_1002, COM_PORT_UART2)
 	saveAllConfigs()
 }
 
@@ -74,13 +78,23 @@ func EnableAll() {
 	saveAllConfigs()
 }
 
-func enableNMEA() {
+func EnableNMEA() {
 	enableRTCMCommand(UBX_NMEA_GLL, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_NMEA_GSA, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_NMEA_GSV, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_NMEA_RMC, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_NMEA_VTG, COM_PORT_UART2, 1)
 	enableRTCMCommand(UBX_NMEA_GGA, COM_PORT_UART2, 1)
+	saveAllConfigs()
+}
+
+func DisableNMEA() {
+	disableRTCMCommand(UBX_NMEA_GLL, COM_PORT_UART2)
+	disableRTCMCommand(UBX_NMEA_GSA, COM_PORT_UART2)
+	disableRTCMCommand(UBX_NMEA_GSV, COM_PORT_UART2)
+	disableRTCMCommand(UBX_NMEA_RMC, COM_PORT_UART2)
+	disableRTCMCommand(UBX_NMEA_VTG, COM_PORT_UART2)
+	disableRTCMCommand(UBX_NMEA_GGA, COM_PORT_UART2)
 	saveAllConfigs()
 }
 
@@ -148,7 +162,7 @@ func sendCommand(cls int, id int, msg_len int, payloadCfg []byte) ([]byte){
 	log.Print(byte(checksumA))
 
 	options := serial.OpenOptions {
-		PortName: "/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.3:1.0", // change to base port
+		PortName: "/dev/serial/by-id/usb-u-blox_AG_-_www.u-blox.com_u-blox_GNSS_receiver-if00", // change to base port
 		BaudRate: 115200,
 		DataBits: 8,
 		StopBits: 1,
