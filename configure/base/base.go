@@ -8,6 +8,7 @@ import (
 const (
 	UBX_SYNCH_1 = 0xB5
 	UBX_SYNCH_2 = 0x62
+	UBX_CFG_TMODE3 = 0x71	//Time Mode 3 Survey In enable
 	UBX_RTCM_1001 = 0x01;
 	UBX_RTCM_1002 = 0x02;
 	UBX_RTCM_1005 = 0x05;   // Stationary RTK reference ARP
@@ -96,6 +97,44 @@ func DisableNMEA() {
 	disableRTCMCommand(UBX_NMEA_VTG, COM_PORT_UART2)
 	disableRTCMCommand(UBX_NMEA_GGA, COM_PORT_UART2)
 	saveAllConfigs()
+}
+
+
+func getSurveyMode() {
+	cls := UBX_CLASS_CFG
+	id := UBX_CFG_TMODE3
+	payloadCfg := make([]byte, 40)
+	return sendCommand(cls, id, 0, payloadCfg)	// set payloadcfg
+}
+
+func setSurveyMode(mode int, requiredAccuracy float64, observationTime int) bool {
+	payloadCfg := getSurveyMode()	// get current configs
+	if len(payload == 0) {
+		return false
+	}
+
+	cls := UBX_CLASS_CFG
+  	id := UBX_CFG_TMODE3
+ 	len := 40
+  	startingSpot := 0
+
+	// payloadCfg should be loaded with poll response. Now modify only the bits we care about
+	payloadCfg[2] = mode; // Set mode. Survey-In and Disabled are most common. Use ECEF (not LAT/LON/ALT).
+
+	// svinMinDur is U4 (uint32_t) in seconds
+	payloadCfg[24] = observationTime & 0xFF // svinMinDur in seconds
+	payloadCfg[25] = (observationTime >> 8) & 0xFF
+	payloadCfg[26] = (observationTime >> 16) & 0xFF
+	payloadCfg[27] = (observationTime >> 24) & 0xFF
+  
+	// svinAccLimit is U4 (uint32_t) in 0.1mm.
+	svinAccLimit := (requiredAccuracy * 10000.0) // Convert m to 0.1mm
+	payloadCfg[28] = svinAccLimit & 0xFF                           // svinAccLimit in 0.1mm increments
+	payloadCfg[29] = (svinAccLimit >> 8) & 0xFF
+	payloadCfg[30] = (svinAccLimit >> 16) & 0xFF
+	payloadCfg[31] = (svinAccLimit >> 24) & 0xFF
+
+	return true
 }
 
 func setStaticPosition(ecefXOrLat int, ecefXOrLatHP int, ecefYOrLon int, ecefYOrLonHP int, ecefZOrAlt int, ecefZOrAltHP int, latLong bool) {
